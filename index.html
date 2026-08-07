@@ -868,30 +868,7 @@
   });
 
   // Final submit: validate -> fire conversion -> show Step 4 (Thank You)
-  document.getElementById('submitLeadBtn').addEventListener('click', ()=>{
-    hideAllErrors();
-    const name = document.getElementById('fullName').value.trim();
-    const phone = document.getElementById('phoneNumber').value.trim();
-    if(!name || !phone){
-      document.getElementById('err-step3').classList.add('show');
-      return;
-    }
-
-    // Fire Google Ads conversion tracking
-    gtag('event', 'conversion', {'send_to': 'AW-823835892'});
-
-    // TODO: send lead payload to backend/CRM here, e.g.:
-    // fetch('/api/leads', { method:'POST', body: JSON.stringify({
-    //   projectDetails: document.getElementById('projectDetails').value,
-    //   streetAddress: document.getElementById('streetAddress').value,
-    //   zipCode: document.getElementById('zipCode').value,
-    //   fullName: name,
-    //   phoneNumber: phone,
-    //   emailAddress: document.getElementById('emailAddress').value
-    // })});
-
-    showStep(4); // Thank You screen — only reachable via successful submit
-  });
+document.getElementById('submitLeadBtn').addEventListener('click', (e)=>{ e.preventDefault(); hideAllErrors(); const name = document.getElementById('fullName').value.trim(); const phone = document.getElementById('phoneNumber').value.trim(); if(!name || !phone){ document.getElementById('err-step3').classList.add('show'); return; } const email = document.getElementById('emailAddress').value.trim(); const streetAddress = document.getElementById('streetAddress').value.trim(); const zipCode = document.getElementById('zipCode').value.trim(); const projectDetails = document.getElementById('projectDetails').value.trim(); const payload = { first_name: name, email: email, phone: phone, address: [streetAddress, zipCode].filter(Boolean).join(', '), project_details: projectDetails }; const submitBtn = document.getElementById('submitLeadBtn'); submitBtn.disabled = true; submitBtn.textContent = 'Submitting...'; fetch('https://services.leadconnectorhq.com/hooks/laY2BqMmxdolNn0OjVSJ/webhook-trigger/f3ba29ec-2511-416c-8a29-0857e773ddf8', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) }).then(()=>{ gtag('event', 'conversion', {'send_to': 'AW-823835892'}); showStep(4); }).catch((error)=>{ console.error('Lead submission failed:', error); document.getElementById('err-step3').textContent = 'Something went wrong sending your request. Please call us directly.'; document.getElementById('err-step3').classList.add('show'); }).finally(()=>{ submitBtn.disabled = false; submitBtn.textContent = 'Submit Request'; }); });
 
   /* ================= Reviews Carousel ================= */
   const track = document.getElementById('carTrack');
