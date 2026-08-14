@@ -260,7 +260,9 @@
   .modal-step-actions.two-btn{display:flex;gap:10px;}
   .modal-step-actions.two-btn .btn-outline,
   .modal-step-actions.two-btn .btn-solid-red{flex:1;}
-  .field-error{
+  .modal-name-row{display:flex;gap:10px;}
+  .modal-name-row .modal-input{flex:1;min-width:0;}
+.field-error{
     font-size:12.5px;color:var(--red);font-weight:600;margin:-6px 0 10px;display:none;
   }
   .field-error.show{display:block;}
@@ -550,7 +552,7 @@
       </div>
       <h2 class="modal-title">Tell Us About Your Project</h2>
       <p class="modal-msg">Please tell us a little about your project so we can prepare for your visit.</p>
-      <textarea id="projectDetails" class="modal-textarea" rows="4" placeholder="e.g. Roof leak near chimney, storm damage on north side, considering full replacement..."></textarea>
+      <textarea id="project_details" name="project_details" class="modal-textarea" rows="4" placeholder="e.g. Roof leak near chimney, storm damage on north side, considering full replacement..."></textarea>
       <div class="field-error" id="err-step1">Please add a few details about your project.</div>
       <div class="modal-step-actions">
         <button class="btn-solid-red modal-next" data-next="2" data-validate="1">Next →</button>
@@ -564,9 +566,10 @@
       </div>
       <h2 class="modal-title">Where Is the Property Located?</h2>
       <p class="modal-msg">We'll use this to assign the closest local inspector.</p>
-      <input type="text" id="streetAddress" class="modal-input" placeholder="Street Address">
-      <input type="text" id="zipCode" class="modal-input" placeholder="Zip Code">
-      <div class="field-error" id="err-step2">Please enter a street address and zip code.</div>
+      <input type="text" id="streetAddress" name="address" class="modal-input" placeholder="Street Address">
+      <input type="text" id="city" name="city" class="modal-input" placeholder="City" required>
+      <input type="text" id="zipCode" name="postal_code" class="modal-input" placeholder="Zip Code">
+      <div class="field-error" id="err-step2">Please enter a street address, city, and zip code.</div>
       <div class="modal-step-actions two-btn">
         <button class="btn-outline modal-back" data-back="1">← Back</button>
         <button class="btn-solid-red modal-next" data-next="3" data-validate="2">Next →</button>
@@ -580,9 +583,12 @@
       </div>
       <h2 class="modal-title">Where Should We Send Your Confirmation?</h2>
       <p class="modal-msg">Last step! We'll text or call to confirm your inspection time.</p>
-      <input type="text" id="fullName" class="modal-input" placeholder="Full Name">
-      <input type="tel" id="phoneNumber" class="modal-input" placeholder="Phone Number">
-      <input type="email" id="emailAddress" class="modal-input" placeholder="Email Address">
+      <div class="modal-name-row">
+        <input type="text" id="first_name" name="first_name" class="modal-input" placeholder="First Name" required>
+        <input type="text" id="last_name" name="last_name" class="modal-input" placeholder="Last Name" required>
+      </div>
+      <input type="tel" id="phoneNumber" name="phone" class="modal-input" placeholder="Phone Number">
+      <input type="email" id="emailAddress" name="email" class="modal-input" placeholder="Email Address">
       <div class="field-error" id="err-step3">Please enter your name and phone number.</div>
       <div class="modal-step-actions two-btn">
         <button class="btn-outline modal-back" data-back="2">← Back</button>
@@ -796,10 +802,12 @@
   }
 
   function resetModal(){
-    document.getElementById('projectDetails').value = '';
+    document.getElementById('project_details').value = '';
     document.getElementById('streetAddress').value = '';
+    document.getElementById('city').value = '';
     document.getElementById('zipCode').value = '';
-    document.getElementById('fullName').value = '';
+    document.getElementById('first_name').value = '';
+    document.getElementById('last_name').value = '';
     document.getElementById('phoneNumber').value = '';
     document.getElementById('emailAddress').value = '';
     hideAllErrors();
@@ -822,7 +830,7 @@
   function validateStep(stepNumber){
     hideAllErrors();
     if(stepNumber === 1){
-      const details = document.getElementById('projectDetails').value.trim();
+      const details = document.getElementById('project_details').value.trim();
       if(details.length < 3){
         document.getElementById('err-step1').classList.add('show');
         return false;
@@ -831,8 +839,9 @@
     }
     if(stepNumber === 2){
       const addr = document.getElementById('streetAddress').value.trim();
+      const city = document.getElementById('city').value.trim();
       const zip = document.getElementById('zipCode').value.trim();
-      if(!addr || !zip){
+      if(!addr || !city || !zip){
         document.getElementById('err-step2').classList.add('show');
         return false;
       }
@@ -868,7 +877,64 @@
   });
 
   // Final submit: validate -> fire conversion -> show Step 4 (Thank You)
-document.getElementById('submitLeadBtn').addEventListener('click', (e)=>{ e.preventDefault(); hideAllErrors(); const name = document.getElementById('fullName').value.trim(); const phone = document.getElementById('phoneNumber').value.trim(); if(!name || !phone){ document.getElementById('err-step3').classList.add('show'); return; } const email = document.getElementById('emailAddress').value.trim(); const streetAddress = document.getElementById('streetAddress').value.trim(); const zipCode = document.getElementById('zipCode').value.trim(); const projectDetails = document.getElementById('projectDetails').value.trim(); const payload = { first_name: name, email: email, phone: phone, address: [streetAddress, zipCode].filter(Boolean).join(', '), project_details: projectDetails }; const submitBtn = document.getElementById('submitLeadBtn'); submitBtn.disabled = true; submitBtn.textContent = 'Submitting...'; fetch('https://services.leadconnectorhq.com/hooks/laY2BqMmxdolNn0OjVSJ/webhook-trigger/b8ff04b2-df10-4d8b-a1fa-169f0af1679b', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) }).then(()=>{ gtag('event', 'conversion', {'send_to': 'AW-823835892'}); showStep(4); }).catch((error)=>{ console.error('Lead submission failed:', error); document.getElementById('err-step3').textContent = 'Something went wrong sending your request. Please call us directly.'; document.getElementById('err-step3').classList.add('show'); }).finally(()=>{ submitBtn.disabled = false; submitBtn.textContent = 'Submit Request'; }); });
+  const GHL_WEBHOOK_URL = 'https://services.leadconnectorhq.com/hooks/laY2BqMmxdolNn0OjVSJ/webhook-trigger/b8ff04b2-df10-4d8b-a1fa-169f0af1679b';
+
+  document.getElementById('submitLeadBtn').addEventListener('click', function(e){
+    e.preventDefault();
+    hideAllErrors();
+
+    const firstName = document.getElementById('first_name').value.trim();
+    const lastName = document.getElementById('last_name').value.trim();
+    const phone = document.getElementById('phoneNumber').value.trim();
+
+    if(!firstName || !lastName || !phone){
+      document.getElementById('err-step3').classList.add('show');
+      return;
+    }
+
+    const email = document.getElementById('emailAddress').value.trim();
+    const streetAddress = document.getElementById('streetAddress').value.trim();
+    const city = document.getElementById('city').value.trim();
+    const zipCode = document.getElementById('zipCode').value.trim();
+    const projectDetails = document.getElementById('project_details').value.trim();
+
+    const payload = {
+      first_name: firstName,
+      last_name: lastName,
+      phone: phone,
+      email: email,
+      address: streetAddress,
+      city: city,
+      postal_code: zipCode,
+      notes: projectDetails
+    };
+
+    console.log('[Lead Form] Submitting payload to GHL webhook:', payload);
+
+    const submitBtn = document.getElementById('submitLeadBtn');
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Submitting...';
+
+    fetch(GHL_WEBHOOK_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    })
+    .then(function(response){
+      console.log('[Lead Form] GHL webhook response status:', response.status);
+      gtag('event', 'conversion', {'send_to': 'AW-823835892'});
+      showStep(4);
+    })
+    .catch(function(error){
+      console.error('[Lead Form] Lead submission failed:', error);
+      document.getElementById('err-step3').textContent = 'Something went wrong sending your request. Please call us directly.';
+      document.getElementById('err-step3').classList.add('show');
+    })
+    .finally(function(){
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Submit Request';
+    });
+  });
 
   /* ================= Reviews Carousel ================= */
   const track = document.getElementById('carTrack');
