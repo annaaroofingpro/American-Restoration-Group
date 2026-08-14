@@ -552,7 +552,7 @@
       </div>
       <h2 class="modal-title">Tell Us About Your Project</h2>
       <p class="modal-msg">Please tell us a little about your project so we can prepare for your visit.</p>
-      <textarea id="project_details" name="project_details" class="modal-textarea" rows="4" placeholder="e.g. Roof leak near chimney, storm damage on north side, considering full replacement..."></textarea>
+      <textarea id="notes" name="notes" class="modal-textarea" rows="4" placeholder="e.g. Roof leak near chimney, storm damage on north side, considering full replacement..."></textarea>
       <div class="field-error" id="err-step1">Please add a few details about your project.</div>
       <div class="modal-step-actions">
         <button class="btn-solid-red modal-next" data-next="2" data-validate="1">Next →</button>
@@ -802,7 +802,7 @@
   }
 
   function resetModal(){
-    document.getElementById('project_details').value = '';
+    document.getElementById('notes').value = '';
     document.getElementById('streetAddress').value = '';
     document.getElementById('city').value = '';
     document.getElementById('zipCode').value = '';
@@ -830,7 +830,7 @@
   function validateStep(stepNumber){
     hideAllErrors();
     if(stepNumber === 1){
-      const details = document.getElementById('project_details').value.trim();
+      const details = document.getElementById('notes').value.trim();
       if(details.length < 3){
         document.getElementById('err-step1').classList.add('show');
         return false;
@@ -896,7 +896,7 @@
     const streetAddress = document.getElementById('streetAddress').value.trim();
     const city = document.getElementById('city').value.trim();
     const zipCode = document.getElementById('zipCode').value.trim();
-    const projectDetails = document.getElementById('project_details').value.trim();
+    const notes = document.getElementById('notes').value.trim();
 
     const payload = {
       first_name: firstName,
@@ -906,7 +906,7 @@
       address: streetAddress,
       city: city,
       postal_code: zipCode,
-      notes: projectDetails
+      notes: notes
     };
 
     console.log('[Lead Form] Submitting payload to GHL webhook:', payload);
