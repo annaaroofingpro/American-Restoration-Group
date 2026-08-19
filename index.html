@@ -922,7 +922,9 @@
     })
     .then(function(response){
       console.log('[Lead Form] GHL webhook response status:', response.status);
-      gtag('event', 'conversion', {'send_to': 'AW-823835892'});
+      if(response.ok){
+        gtag('event', 'conversion', {'send_to': 'AW-823835892'});
+      }
       showStep(4);
     })
     .catch(function(error){
