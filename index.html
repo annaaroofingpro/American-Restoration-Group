@@ -923,6 +923,22 @@
     .then(function(response){
       console.log('[Lead Form] GHL webhook response status:', response.status);
       if(response.ok){
+        // Enhanced conversions (in-page code)
+        var digits = phone.replace(/\D/g, '');
+        if(digits.length === 10){ digits = '1' + digits; }
+        var userData = {};
+        if(email){ userData.email = email.toLowerCase(); }
+        if(digits.length >= 11){ userData.phone_number = '+' + digits; }
+        userData.address = {
+          first_name: firstName,
+          last_name: lastName,
+          street: streetAddress,
+          city: city,
+          region: 'IL',
+          postal_code: zipCode,
+          country: 'US'
+        };
+        gtag('set', 'user_data', userData);
         gtag('event', 'conversion', {'send_to': 'AW-823835892/uKNSCPajr_kcEPT56ogD'});
       }
       showStep(4);
