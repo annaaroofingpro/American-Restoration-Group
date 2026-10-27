@@ -925,6 +925,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     .then(function(response){
       console.log('[Lead Form] GHL webhook response status:', response.status);
       if(response.ok){
+        window.location.href = '/thank-you/';
+        return;
       }
       showStep(4);
     })
